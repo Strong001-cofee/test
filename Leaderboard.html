@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard - VCodeClass</title>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts for Inter and JetBrains Mono -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* CSS Variables for consistent theming (copied from dashboard/home) */
+      :root {
+        --primary-bg: #0a0a0f;
+        --secondary-bg: #1a1a2e;
+        --glass-bg: rgba(26, 26, 46, 0.3);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --neon-primary: #00d4ff;
+        --neon-secondary: #ff006e;
+        --neon-accent: #8b5cf6;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a0a0;
+        --text-muted: #666666;
+        --success: #00ff88;
+        --warning: #ffaa00;
+        --error: #ff4757;
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        --shadow-neon: 0 0 20px rgba(0, 212, 255, 0.3);
+        --blur: 16px;
+      }
+
+      /* Universal box-sizing for consistent layout */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Body styling for background, font, and layout */
+      body {
+        font-family: "Inter", sans-serif; /* Consistent font */
+        background: var(--primary-bg);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+        min-height: 100vh;
+        background-image: radial-gradient(
+            circle at 20% 80%,
+            rgba(120, 119, 198, 0.3),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(255, 119, 198, 0.3),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 40%,
+            rgba(120, 219, 255, 0.2),
+            transparent 50%
+          );
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Animated background particles (copied from dashboard/home) */
+      .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: var(--neon-primary);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+        opacity: 0.6;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+          opacity: 0.6;
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+          opacity: 1;
+        }
+      }
+
+      /* Header Styles (copied from dashboard/home) */
+      header {
+        backdrop-filter: blur(var(--blur));
+        -webkit-backdrop-filter: blur(var(--blur));
+        background: var(--glass-bg);
+        border-bottom: 1px solid var(--glass-border);
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow-glass);
+      }
+
+      .header-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+      }
+
+      .logo {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: var(--gradient-accent);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .logo:hover {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      nav a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        background: transparent;
+      }
+
+      nav a:hover {
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+
+      nav a::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: var(--gradient-accent);
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+      }
+
+      nav a:hover::after {
+        width: 80%;
+      }
+
+      /* Leaderboard Section Specific Styles */
+      .leaderboard-section {
+        max-width: 900px; /* Slightly wider for more content */
+        margin: 50px auto;
+        padding: 30px 40px;
+        background: var(--glass-bg); /* Glassmorphism background */
+        backdrop-filter: blur(var(--blur));
+        -webkit-backdrop-filter: blur(var(--blur));
+        border: 1px solid var(--glass-border); /* Glassmorphism border */
+        border-radius: 20px; /* Rounded corners */
+        box-shadow: var(--shadow-glass); /* Glassmorphism shadow */
+        position: relative;
+        z-index: 10;
+        animation: fadeInUp 1s ease-out; /* Add animation */
+      }
+
+      .leaderboard-section h1 {
+        text-align: center;
+        font-size: 3.5rem; /* Larger title */
+        font-weight: 700;
+        margin-bottom: 30px;
+        background: var(--gradient-primary); /* Gradient title */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
+      }
+
+      .leaderboard-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.05); /* Slightly lighter glass */
+        border-left: 5px solid var(--neon-primary); /* Neon accent border */
+        border-radius: 12px; /* More rounded */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+        transition: all 0.3s ease;
+      }
+
+      .leaderboard-row:hover {
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: var(--shadow-glass), 0 0 15px rgba(0, 212, 255, 0.2); /* Neon hover effect */
+        border-color: var(--neon-accent); /* Change border color on hover */
+      }
+
+      .rank {
+        font-size: 24px; /* Larger rank */
+        font-weight: bold;
+        color: var(--neon-secondary); /* Neon secondary for rank */
+        min-width: 60px;
+        text-align: center;
+        text-shadow: 0 0 8px rgba(255, 0, 110, 0.5); /* Neon glow for rank */
+      }
+
+      .rank:nth-child(1) {
+        color: #ffd700; /* Gold for 1st */
+        text-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+      }
+      .rank:nth-child(2) {
+        color: #c0c0c0; /* Silver for 2nd */
+        text-shadow: 0 0 10px rgba(192, 192, 192, 0.7);
+      }
+      .rank:nth-child(3) {
+        color: #cd7f32; /* Bronze for 3rd */
+        text-shadow: 0 0 8px rgba(205, 127, 50, 0.6);
+      }
+
+      .student-name {
+        font-size: 1.1rem; /* Slightly larger text */
+        color: var(--text-primary);
+        flex-grow: 1;
+        margin-left: 20px; /* More spacing */
+        font-weight: 500;
+      }
+
+      .grade {
+        font-size: 1.3rem; /* Larger grade */
+        font-weight: bold;
+        color: var(--success); /* Success color for grades */
+        min-width: 70px; /* Ensure enough space */
+        text-align: right;
+        text-shadow: 0 0 8px rgba(0, 255, 136, 0.5); /* Neon glow for grade */
+      }
+
+      /* Loading and Error Message Styles */
+      .message-text {
+        text-align: center;
+        color: var(--text-secondary);
+        padding: 2rem;
+        font-size: 1.1rem;
+      }
+
+      .message-text.error {
+        color: var(--error);
+      }
+
+      .message-text.info {
+        color: var(--neon-primary);
+      }
+
+      /* Loading Animation (copied from dashboard) */
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--neon-primary);
+        animation: spin 1s ease-in-out infinite;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Animations (copied from dashboard/home) */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Mobile Responsiveness (copied from dashboard/home) */
+      @media (max-width: 768px) {
+        .header-container {
+          padding: 0 1rem;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .logo {
+          font-size: 1.5rem;
+        }
+
+        nav ul {
+          gap: 1rem;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        nav a {
+          padding: 0.4rem 0.8rem;
+          font-size: 0.9rem;
+        }
+
+        .leaderboard-section {
+          margin: 30px 1rem;
+          padding: 20px;
+        }
+
+        .leaderboard-section h1 {
+          font-size: 2.5rem;
+        }
+
+        .leaderboard-row {
+          padding: 10px 15px;
+          margin-bottom: 8px;
+        }
+
+        .rank {
+          font-size: 20px;
+          min-width: 40px;
+        }
+
+        .student-name {
+          font-size: 1rem;
+          margin-left: 10px;
+        }
+
+        .grade {
+          font-size: 1.1rem;
+          min-width: 50px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .leaderboard-section h1 {
+          font-size: 2rem;
+        }
+      }
+
+      /* Scrollbar Styling (copied from dashboard/home) */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--primary-bg);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--gradient-accent);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--neon-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Animated Background Particles -->
+    <div class="particles" id="particles"></div>
+
+    <header>
+      <div class="header-container">
+        <a href="home.html" class="logo">
+          <i class="fas fa-code"></i>
+          VCodeClass
+        </a>
+        <nav>
+          <ul>
+            <li>
+              <a href="home.html"><i class="fas fa-home"></i> Home</a>
+            </li>
+            <li>
+              <a href="dashboard.html"
+                ><i class="fas fa-tachometer-alt"></i> Dashboard</a
+              >
+            </li>
+            <li>
+              <a href="editor.html"><i class="fas fa-code"></i> Editor</a>
+            </li>
+            <li>
+              <a href="Leaderboard.html"
+                ><i class="fas fa-trophy"></i> Leaderboard</a
+              >
+            </li>
+            <li>
+              <a href="#" onclick="logout()"
+                ><i class="fas fa-sign-out-alt"></i> Logout</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <section class="leaderboard-section">
+      <h1>🏆 Leaderboard</h1>
+
+      <div id="leaderboardList">
+        <!-- Dynamic student rows will be inserted here -->
+        <p class="message-text info">
+          <span class="loading"></span> Loading leaderboard...
+        </p>
+      </div>
+    </section>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // Function to create animated background particles (copied from dashboard/home)
+      function createParticles() {
+        const particlesContainer = document.getElementById("particles");
+        if (particlesContainer) {
+          particlesContainer.innerHTML = ""; // Clear existing particles
+        }
+        const particleCount = window.innerWidth < 768 ? 30 : 50;
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+          particle.style.left = Math.random() * 100 + "%";
+          particle.style.top = Math.random() * 100 + "%";
+          particle.style.animationDelay = Math.random() * 6 + "s";
+          particle.style.animationDuration = Math.random() * 3 + 3 + "s";
+          particlesContainer.appendChild(particle);
+        }
+      }
+
+      // Initialize particles when the window loads
+      window.onload = createParticles;
+
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyAuOQ2V83e8o3Q_F9chjwtrN1kqw4qtUcg",
+        authDomain: "virtual-coding-classroom.firebaseapp.com",
+        projectId: "virtual-coding-classroom",
+        storageBucket: "virtual-coding-classroom.firebasestorage.app",
+        messagingSenderId: "201134199336",
+        appId: "1:201134199336:web:d9a43073d86dcbf97c1b1d",
+        measurementId: "G-3GMPFN3T6C",
+      };
+
+      // Initialize Firebase app and services
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      // Add resize handler for particles: re-create particles on window resize
+      window.addEventListener("resize", () => {
+        createParticles();
+      });
+
+      const leaderboardList = document.getElementById("leaderboardList");
+
+      async function loadLeaderboard() {
+        leaderboardList.innerHTML = `
+          <p class="message-text info">
+            <span class="loading"></span> Loading leaderboard...
+          </p>
+        `; // Show loading indicator
+
+        try {
+          // Ensure user is authenticated before loading leaderboard
+          const user = auth.currentUser;
+          if (!user) {
+            leaderboardList.innerHTML =
+              "<p class='message-text error'>Please log in to view the leaderboard.</p>";
+            return;
+          }
+
+          const snapshot = await db
+            .collection("submissions")
+            .where("status", "==", "Graded")
+            // Removed orderBy here to avoid potential index issues, will sort in JS
+            .get();
+
+          const leaderboard = {}; // This will store the highest grade for each unique student (by studentId)
+          const studentIds = new Set(); // Collect all unique student IDs
+
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const studentId = data.studentId; // Use studentId for aggregation
+            const grade = data.grade || 0;
+
+            // Aggregate best grade per student (by studentId)
+            if (
+              !leaderboard[studentId] ||
+              grade > leaderboard[studentId].grade
+            ) {
+              leaderboard[studentId] = {
+                grade: grade,
+                email: data.studentEmail, // Store email as fallback
+              };
+              studentIds.add(studentId);
+            }
+          });
+
+          // Fetch full names for all unique student IDs
+          const userNamesMap = {};
+          if (studentIds.size > 0) {
+            // Firestore 'in' query is limited to 10 items. For more, you'd need multiple queries or a different approach.
+            // For simplicity, assuming less than or equal to 10 unique students for now.
+            // If you have more than 10 unique studentIds, you'll need to split the `in` query into multiple queries.
+            const uniqueStudentIdsArray = Array.from(studentIds);
+            const batchSize = 10; // Max for 'in' query
+            const userPromises = [];
+
+            for (let i = 0; i < uniqueStudentIdsArray.length; i += batchSize) {
+              const batch = uniqueStudentIdsArray.slice(i, i + batchSize);
+              userPromises.push(
+                db
+                  .collection("users")
+                  .where(firebase.firestore.FieldPath.documentId(), "in", batch)
+                  .get()
+              );
+            }
+
+            const userSnapshots = await Promise.all(userPromises);
+            userSnapshots.forEach((userDocs) => {
+              userDocs.forEach((doc) => {
+                if (doc.exists) {
+                  userNamesMap[doc.id] =
+                    doc.data().fullName || doc.data().email; // Use fullName, fallback to email
+                }
+              });
+            });
+          }
+
+          // Convert aggregated data to an array and sort by grade (descending)
+          const sortedStudents = Object.entries(leaderboard)
+            .map(([studentId, data]) => ({
+              studentId: studentId,
+              name: userNamesMap[studentId] || data.email, // Use fetched name, fallback to email
+              grade: data.grade,
+            }))
+            .sort((a, b) => b.grade - a.grade); // Sort in JavaScript
+
+          leaderboardList.innerHTML = ""; // Clear previous content
+
+          if (sortedStudents.length === 0) {
+            leaderboardList.innerHTML =
+              "<p class='message-text'>No graded submissions yet. Keep coding!</p>";
+            return;
+          }
+
+          sortedStudents.forEach((student, index) => {
+            const rank = index + 1; // Calculate numerical rank
+
+            const row = document.createElement("div");
+            row.className = "leaderboard-row";
+            row.innerHTML = `
+            <div class="rank">${rank}</div>
+            <div class="student-name">${student.name}</div>
+            <div class="grade">${student.grade}</div>
+          `;
+            leaderboardList.appendChild(row);
+          });
+        } catch (err) {
+          console.error("Error loading leaderboard:", err);
+          leaderboardList.innerHTML =
+            "<p class='message-text error'>Error loading leaderboard. Please try again later.</p>";
+        }
+      }
+
+      // Load leaderboard on page load, after Firebase Auth state is known
+      document.addEventListener("DOMContentLoaded", () => {
+        auth.onAuthStateChanged((user) => {
+          if (user) {
+            loadLeaderboard();
+          } else {
+            leaderboardList.innerHTML =
+              "<p class='message-text error'>Please log in to view the leaderboard.</p>";
+          }
+        });
+      });
+
+      // Logout function (copied from dashboard)
+      function logout() {
+        auth
+          .signOut()
+          .then(() => {
+            localStorage.removeItem("vcc_user"); // Clear specific local storage items
+            localStorage.removeItem("vcc_role");
+            // Optionally, you could use a toast message here if you implement one for this page
+            window.location.href = "login.html";
+          })
+          .catch((error) => {
+            console.error("Error logging out:", error);
+            // Add a simple message or integrate a toast system if needed
+          });
+      }
+
+      // Make logout function globally accessible
+      window.logout = logout;
+
+      // Add smooth scroll behavior for anchor links (less critical for this page, but good for consistency)
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

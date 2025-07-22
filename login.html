@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - VCodeClass</title>
+    <!-- Font Awesome for icons (updated to 6.4.0 for consistency) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts for Inter and JetBrains Mono -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* CSS Variables for consistent theming (copied from other pages) */
+      :root {
+        --primary-bg: #0a0a0f;
+        --secondary-bg: #1a1a2e;
+        --glass-bg: rgba(26, 26, 46, 0.3);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --neon-primary: #00d4ff;
+        --neon-secondary: #ff006e;
+        --neon-accent: #8b5cf6;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a0a0;
+        --text-muted: #666666;
+        --success: #00ff88;
+        --warning: #ffaa00;
+        --error: #ff4757;
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        --shadow-neon: 0 0 20px rgba(0, 212, 255, 0.3);
+        --blur: 16px;
+      }
+
+      /* Universal box-sizing for consistent layout */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Body styling for background, font, and layout */
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--primary-bg);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+        min-height: 100vh;
+        background-image: radial-gradient(
+            circle at 20% 80%,
+            rgba(120, 119, 198, 0.3),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(255, 119, 198, 0.3),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 40%,
+            rgba(120, 219, 255, 0.2),
+            transparent 50%
+          );
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Center content vertically */
+        align-items: center; /* Center content horizontally */
+      }
+
+      /* Animated background particles (copied from other pages) */
+      .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: var(--neon-primary);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+        opacity: 0.6;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+          opacity: 0.6;
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+          opacity: 1;
+        }
+      }
+
+      /* Main container for centering the form */
+      .main-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 60px); /* Adjust for toast message */
+        padding: 30px 20px; /* Add some padding */
+        position: relative;
+        z-index: 10; /* Above particles */
+      }
+
+      /* Form container styling (glassmorphism) */
+      .form-container {
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--blur));
+        -webkit-backdrop-filter: blur(var(--blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: var(--shadow-glass);
+        padding: 40px;
+        max-width: 450px; /* Max width for the form */
+        width: 100%;
+        text-align: center;
+        animation: fadeInUp 0.8s ease-out;
+      }
+
+      .icon {
+        font-size: 3rem;
+        color: var(--neon-primary);
+        margin-bottom: 20px;
+        background: var(--gradient-accent);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .field {
+        position: relative;
+        margin-bottom: 25px;
+      }
+
+      .field input[type="email"],
+      .field input[type="password"],
+      .field select {
+        width: 100%;
+        padding: 14px 18px 14px 45px; /* Left padding for icon */
+        background-color: var(--secondary-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-family: "Inter", sans-serif;
+        box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .field input::placeholder,
+      .field textarea::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.7;
+      }
+
+      .field input:focus,
+      .field select:focus {
+        outline: none;
+        border-color: var(--neon-primary);
+        box-shadow: inset 0 0 8px rgba(0, 212, 255, 0.3),
+          0 0 15px rgba(0, 212, 255, 0.2);
+      }
+
+      .field i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+      }
+
+      .field i.fa-eye,
+      .field i.fa-eye-slash {
+        left: auto; /* Override left for eye icon */
+        right: 15px; /* Position eye icon on the right */
+        cursor: pointer;
+      }
+
+      .field select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 18px;
+      }
+
+      /* Button container for the shifting effect */
+      .btn-container {
+        padding: 20px 0; /* Adjusted padding */
+        transition: 0.2s linear;
+        position: relative;
+        overflow: hidden;
+        height: 60px; /* Fixed height for the container */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Login button styling (merged with existing .btn styles) */
+      #login-btn {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: 0.75rem 2.5rem; /* Increased padding for a larger button */
+        border-radius: 2rem; /* Fully rounded */
+        font-weight: 600;
+        font-size: 1.1rem; /* Larger font size */
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease; /* Combined transitions */
+        position: absolute; /* Needed for shifting effect */
+        display: inline-flex; /* For icon alignment */
+        align-items: center;
+        gap: 0.5rem;
+        overflow: hidden; /* For shimmer effect */
+      }
+
+      /* Shimmer effect for buttons */
+      #login-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      #login-btn:hover::before {
+        left: 100%;
+      }
+
+      #login-btn:hover {
+        transform: translateY(
+          -2px
+        ) !important; /* Override shifting transform */
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Shifting classes (retained) */
+      .shift-left {
+        transform: translateX(-120%);
+      }
+
+      .shift-right {
+        transform: translateX(120%);
+      }
+
+      .shift-top {
+        transform: translateY(-120%);
+      }
+
+      .shift-bottom {
+        transform: translateY(120%);
+      }
+
+      .no-shift {
+        transform: translate(0, 0);
+      }
+
+      /* Signup and back to home links */
+      .signup,
+      .back-to-home {
+        margin-top: 20px;
+        font-size: 1rem;
+        color: var(--text-secondary);
+      }
+
+      .signup a,
+      .back-to-home a {
+        color: var(--neon-primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      .signup a:hover,
+      .back-to-home a:hover {
+        color: var(--neon-accent);
+        text-decoration: underline;
+      }
+
+      /* Centering helper class */
+      .centered-flex {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Toast message styles (copied from dashboard) */
+      .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        color: var(--text-primary);
+        box-shadow: var(--shadow-glass);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 400px;
+        display: flex; /* For icon alignment */
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .toast.success {
+        border-color: var(--success);
+        box-shadow: var(--shadow-glass), 0 0 20px rgba(0, 255, 136, 0.3);
+      }
+
+      .toast.error {
+        border-color: var(--error);
+        box-shadow: var(--shadow-glass), 0 0 20px rgba(255, 71, 87, 0.3);
+      }
+
+      .toast.info {
+        border-color: var(--neon-primary);
+        box-shadow: var(--shadow-glass), 0 0 20px rgba(0, 212, 255, 0.3);
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Mobile Responsiveness */
+      @media (max-width: 768px) {
+        .form-container {
+          padding: 30px 20px;
+          margin: 20px;
+        }
+
+        .title {
+          font-size: 1.8rem;
+        }
+
+        .field input,
+        .field select {
+          font-size: 0.9rem;
+          padding: 12px 15px 12px 40px;
+        }
+
+        .field i {
+          font-size: 1rem;
+          left: 12px;
+        }
+
+        .field i.fa-eye,
+        .field i.fa-eye-slash {
+          right: 12px;
+        }
+
+        #login-btn {
+          font-size: 1rem;
+          padding: 0.6rem 2rem;
+        }
+
+        .signup,
+        .back-to-home {
+          font-size: 0.9rem;
+        }
+
+        .toast {
+          bottom: 1rem;
+          right: 1rem;
+          left: 1rem;
+          max-width: none;
+        }
+      }
+
+      /* Scrollbar Styling (copied from other pages) */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--primary-bg);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--gradient-accent);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--neon-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Animated Background Particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="main-container">
+      <div class="form-container">
+        <div class="icon"><i class="fas fa-user-circle"></i></div>
+        <form id="loginForm">
+          <h2 class="title">Login to Your Account</h2>
+
+          <div class="field">
+            <input type="email" id="email" placeholder="Email" required />
+            <i class="fas fa-envelope"></i>
+          </div>
+
+          <div class="field">
+            <select id="role" required>
+              <option value="">Select Role</option>
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+            </select>
+            <i class="fas fa-user-tag"></i>
+          </div>
+
+          <div class="field">
+            <input
+              type="password"
+              id="password"
+              placeholder="Password"
+              required
+            />
+            <i class="fas fa-eye" id="togglePassword" title="Show Password"></i>
+          </div>
+
+          <div class="btn-container">
+            <button id="login-btn" type="submit" class="no-shift">
+              <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+          </div>
+
+          <p class="signup">
+            Don't have an account? <a href="register.html">Register</a>
+          </p>
+          <p class="back-to-home">
+            <a href="home.html">← Back to Homepage</a>
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <div id="loginToast" class="toast"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // Function to create animated background particles (copied from other pages)
+      function createParticles() {
+        const particlesContainer = document.getElementById("particles");
+        if (particlesContainer) {
+          particlesContainer.innerHTML = ""; // Clear existing particles
+        }
+        const particleCount = window.innerWidth < 768 ? 30 : 50;
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+          particle.style.left = Math.random() * 100 + "%";
+          particle.style.top = Math.random() * 100 + "%";
+          particle.style.animationDelay = Math.random() * 6 + "s";
+          particle.style.animationDuration = Math.random() * 3 + 3 + "s";
+          particlesContainer.appendChild(particle);
+        }
+      }
+
+      // Initialize particles when the window loads
+      window.onload = createParticles;
+
+      // Add resize handler for particles: re-create particles on window resize
+      window.addEventListener("resize", () => {
+        createParticles();
+      });
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAuOQ2V83e8o3Q_F9chjwtrN1kqw4qtUcg",
+        authDomain: "virtual-coding-classroom.firebaseapp.com",
+        projectId: "virtual-coding-classroom",
+        storageBucket: "virtual-coding-classroom.firebasestorage.app",
+        messagingSenderId: "201134199336",
+        appId: "1:201134199336:web:d9a43073d86dcbf97c1b1d",
+        measurementId: "G-3GMPFN3T6C",
+      };
+
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      // Helper function for toast messages (updated to match dashboard styling)
+      function showToast(message, type = "info") {
+        const toastElement = document.getElementById("loginToast");
+        // Add icon based on message type
+        const iconClass =
+          type === "success"
+            ? "fas fa-check-circle"
+            : type === "error"
+            ? "fas fa-exclamation-circle"
+            : "fas fa-info-circle";
+        toastElement.innerHTML = `<i class="${iconClass}"></i> ${message}`;
+        toastElement.className = `toast show ${type}`;
+        setTimeout(() => {
+          toastElement.classList.remove("show");
+        }, 4000); // Increased duration for better readability
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("loginForm");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const roleSelect = document.getElementById("role");
+        const loginBtn = document.getElementById("login-btn");
+        const togglePassword = document.getElementById("togglePassword");
+
+        let moveCount = 0;
+
+        function fieldsFilled() {
+          return (
+            emailInput.value.trim() !== "" &&
+            passwordInput.value.trim() !== "" &&
+            roleSelect.value !== ""
+          );
+        }
+
+        function moveButton() {
+          if (fieldsFilled()) {
+            loginBtn.className = "no-shift"; // Apply no-shift class
+            loginBtn.classList.add("btn"); // Add the base btn class for styling
+          } else {
+            loginBtn.classList.remove("no-shift"); // Remove no-shift
+            loginBtn.classList.remove("btn"); // Remove base btn class
+            const shifts = [
+              "shift-left",
+              "shift-right",
+              "shift-top",
+              "shift-bottom",
+            ];
+            // Remove all shift classes before adding a new one
+            loginBtn.classList.remove(...shifts);
+            loginBtn.classList.add(shifts[moveCount % shifts.length]);
+            moveCount++;
+          }
+        }
+
+        // Event listeners for input changes and mouseenter
+        emailInput.addEventListener("input", moveButton);
+        passwordInput.addEventListener("input", moveButton);
+        roleSelect.addEventListener("change", moveButton);
+        loginBtn.addEventListener("mouseenter", moveButton);
+
+        // Initial check on load
+        moveButton();
+
+        // Toggle password visibility
+        togglePassword.addEventListener("click", () => {
+          const type = passwordInput.type === "password" ? "text" : "password";
+          passwordInput.type = type;
+
+          if (type === "text") {
+            togglePassword.classList.remove("fa-eye");
+            togglePassword.classList.add("fa-eye-slash");
+            togglePassword.title = "Hide Password";
+          } else {
+            togglePassword.classList.remove("fa-eye-slash");
+            togglePassword.classList.add("fa-eye");
+            togglePassword.title = "Show Password";
+          }
+        });
+
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const email = emailInput.value.trim();
+          const password = passwordInput.value;
+          const role = roleSelect.value;
+
+          if (!fieldsFilled()) {
+            showToast("Please fill all fields!", "error");
+            return;
+          }
+
+          try {
+            const userCredential = await auth.signInWithEmailAndPassword(
+              email,
+              password
+            );
+            const user = userCredential.user;
+
+            const userDoc = await db.collection("users").doc(user.uid).get();
+
+            if (userDoc.exists) {
+              const userData = userDoc.data();
+              const storedRole = userData.role;
+              const storedFullName = userData.fullName;
+
+              if (storedRole === role) {
+                localStorage.setItem("vcc_user", storedFullName);
+                localStorage.setItem("vcc_role", storedRole);
+                showToast(
+                  "Login successful! Redirecting to dashboard.",
+                  "success"
+                );
+                setTimeout(
+                  () => (window.location.href = "dashboard.html"),
+                  1500
+                );
+              } else {
+                await auth.signOut();
+                showToast(
+                  `Login failed: You are registered as a ${storedRole}, not a ${role}.`,
+                  "error"
+                );
+              }
+            } else {
+              await auth.signOut();
+              showToast(
+                "User profile not found. Please register again.",
+                "error"
+              );
+            }
+          } catch (error) {
+            let errorMessage = "Login failed. Please check your credentials.";
+            if (
+              error.code === "auth/user-not-found" ||
+              error.code === "auth/wrong-password" ||
+              error.code === "auth/invalid-credential" // Firebase 9+ might use this
+            ) {
+              errorMessage = "Invalid email or password.";
+            } else if (error.code === "auth/invalid-email") {
+              errorMessage = "Invalid email format.";
+            } else if (error.code === "auth/too-many-requests") {
+              errorMessage =
+                "Too many failed login attempts. Please try again later.";
+            }
+            showToast(errorMessage, "error");
+            console.error("Login error:", error); // Log the actual error for debugging
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

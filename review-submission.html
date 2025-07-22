@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Review Submission - VCodeClass</title>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts for Inter and JetBrains Mono -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* CSS Variables for consistent theming (copied from dashboard/home/leaderboard/assignment) */
+      :root {
+        --primary-bg: #0a0a0f;
+        --secondary-bg: #1a1a2e;
+        --glass-bg: rgba(26, 26, 46, 0.3);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --neon-primary: #00d4ff;
+        --neon-secondary: #ff006e;
+        --neon-accent: #8b5cf6;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a0a0;
+        --text-muted: #666666;
+        --success: #00ff88;
+        --warning: #ffaa00;
+        --error: #ff4757;
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        --shadow-neon: 0 0 20px rgba(0, 212, 255, 0.3);
+        --blur: 16px;
+      }
+
+      /* Universal box-sizing for consistent layout */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Body styling for background, font, and layout */
+      body {
+        font-family: "Inter", sans-serif; /* Consistent font */
+        background: var(--primary-bg);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+        min-height: 100vh;
+        background-image: radial-gradient(
+            circle at 20% 80%,
+            rgba(120, 119, 198, 0.3),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(255, 119, 198, 0.3),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 40%,
+            rgba(120, 219, 255, 0.2),
+            transparent 50%
+          );
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Animated background particles (copied from dashboard/home/leaderboard/assignment) */
+      .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: var(--neon-primary);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+        opacity: 0.6;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+          opacity: 0.6;
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+          opacity: 1;
+        }
+      }
+
+      /* Header Styles (copied from dashboard/home/leaderboard/assignment) */
+      header {
+        backdrop-filter: blur(var(--blur));
+        -webkit-backdrop-filter: blur(var(--blur));
+        background: var(--glass-bg);
+        border-bottom: 1px solid var(--glass-border);
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow-glass);
+      }
+
+      .header-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+      }
+
+      .logo {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: var(--gradient-accent);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .logo:hover {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      nav a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        background: transparent;
+      }
+
+      nav a:hover {
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+
+      nav a::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: var(--gradient-accent);
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+      }
+
+      nav a:hover::after {
+        width: 80%;
+      }
+
+      /* Review Section Specific Styles */
+      .review-section {
+        max-width: 900px;
+        margin: 50px auto;
+        padding: 30px 40px;
+        background: var(--glass-bg); /* Glassmorphism background */
+        backdrop-filter: blur(var(--blur));
+        -webkit-backdrop-filter: blur(var(--blur));
+        border: 1px solid var(--glass-border); /* Glassmorphism border */
+        border-radius: 20px; /* Rounded corners */
+        box-shadow: var(--shadow-glass); /* Glassmorphism shadow */
+        position: relative;
+        z-index: 10;
+        animation: fadeInUp 1s ease-out; /* Add animation */
+        flex-grow: 1; /* Allow it to take up available space */
+      }
+
+      .review-section h1 {
+        font-size: 3.5rem; /* Larger title */
+        font-weight: 700;
+        margin-bottom: 25px;
+        background: var(--gradient-primary); /* Gradient title */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        line-height: 1.2;
+      }
+
+      .review-section h3 {
+        font-size: 1.8rem; /* Consistent sub-heading size */
+        color: var(--neon-primary); /* Neon primary for subheadings */
+        margin-top: 30px;
+        margin-bottom: 15px;
+        text-align: left;
+      }
+
+      .review-details p {
+        font-size: 1.1rem; /* Consistent text size */
+        color: var(--text-secondary); /* Secondary text color */
+        margin-bottom: 10px;
+        text-align: left;
+      }
+
+      .review-details strong {
+        color: var(--neon-accent); /* Neon accent for strong text */
+      }
+
+      .code-display-area,
+      .output-display-area {
+        background-color: var(
+          --secondary-bg
+        ); /* Darker background for code/output */
+        border: 1px solid var(--glass-border); /* Subtle glass border */
+        border-radius: 12px; /* Consistent rounded corners */
+        padding: 15px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        overflow-x: auto;
+        max-height: 400px; /* Limit height for code area */
+        white-space: pre-wrap;
+        font-family: "JetBrains Mono", monospace; /* Monospace font for code */
+        font-size: 0.95rem; /* Slightly larger font for readability */
+        color: var(--text-primary);
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3); /* Inner shadow for depth */
+      }
+
+      .output-display-area {
+        border-color: var(
+          --neon-secondary
+        ); /* Different border color for output */
+      }
+
+      .feedback-section {
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid var(--glass-border); /* Separator */
+      }
+
+      .feedback-section h2 {
+        font-size: 2.5rem; /* Consistent heading size */
+        font-weight: 700;
+        background: var(--gradient-secondary); /* Gradient for feedback title */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      .feedback-section label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 1.1rem; /* Consistent label size */
+        color: var(--neon-primary); /* Neon primary for labels */
+        font-weight: 500;
+      }
+
+      .feedback-section input[type="number"],
+      .feedback-section textarea {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        background-color: var(
+          --secondary-bg
+        ); /* Darker background for inputs */
+        border: 1px solid var(--glass-border); /* Glass border for inputs */
+        border-radius: 12px; /* Consistent rounded corners */
+        color: var(--text-primary);
+        font-size: 1rem;
+        resize: vertical;
+        box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
+        transition: border-color 0.3s ease;
+      }
+
+      .feedback-section input[type="number"]:focus,
+      .feedback-section textarea:focus {
+        outline: none;
+        border-color: var(--neon-primary); /* Neon focus effect */
+      }
+
+      .feedback-section textarea {
+        min-height: 150px; /* Slightly taller textarea */
+      }
+
+      /* Button Styles (copied from dashboard/home) */
+      .btn {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        width: 100%; /* Make button full width in this section */
+        margin-top: 10px; /* Adjust margin */
+      }
+
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .btn:hover::before {
+        left: 100%;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Toast message styles (copied from dashboard) */
+      .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        color: var(--text-primary);
+        box-shadow: var(--shadow-glass);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 400px;
+        display: flex; /* For icon alignment */
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .toast.success {
+        border-color: var(--success);
+        box-shadow: var(--shadow-glass), 0 0 20px rgba(0, 255, 136, 0.3);
+      }
+
+      .toast.error {
+        border-color: var(--error);
+        box-shadow: var(--shadow-glass), 0 0 20px rgba(255, 71, 87, 0.3);
+      }
+
+      .toast.info {
+        border-color: var(--neon-primary);
+        box-shadow: var(--shadow-glass), 0 0 20px rgba(0, 212, 255, 0.3);
+      }
+
+      /* Loading Animation (copied from dashboard) */
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--neon-primary);
+        animation: spin 1s ease-in-out infinite;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Animations (copied from dashboard/home/leaderboard/assignment) */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Mobile Responsiveness (copied from dashboard/home/leaderboard/assignment) */
+      @media (max-width: 768px) {
+        .header-container {
+          padding: 0 1rem;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .logo {
+          font-size: 1.5rem;
+        }
+
+        nav ul {
+          gap: 1rem;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        nav a {
+          padding: 0.4rem 0.8rem;
+          font-size: 0.9rem;
+        }
+
+        .review-section {
+          margin: 30px 1rem;
+          padding: 20px;
+        }
+
+        .review-section h1 {
+          font-size: 2.5rem;
+        }
+
+        .review-section h3 {
+          font-size: 1.5rem;
+        }
+
+        .review-details p {
+          font-size: 1rem;
+        }
+
+        .code-display-area,
+        .output-display-area {
+          font-size: 0.85rem;
+        }
+
+        .feedback-section h2 {
+          font-size: 2rem;
+        }
+
+        .feedback-section label {
+          font-size: 1rem;
+        }
+
+        .feedback-section input[type="number"],
+        .feedback-section textarea {
+          font-size: 0.9rem;
+        }
+
+        .btn {
+          padding: 0.6rem 1.5rem;
+          font-size: 0.9rem;
+        }
+
+        .toast {
+          bottom: 1rem;
+          right: 1rem;
+          left: 1rem;
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .review-section h1 {
+          font-size: 2rem;
+        }
+
+        .review-section h3 {
+          font-size: 1.3rem;
+        }
+
+        .feedback-section h2 {
+          font-size: 1.8rem;
+        }
+      }
+
+      /* Scrollbar Styling (copied from dashboard/home/leaderboard/assignment) */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--primary-bg);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--gradient-accent);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--neon-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Animated Background Particles -->
+    <div class="particles" id="particles"></div>
+
+    <header>
+      <div class="header-container">
+        <a href="home.html" class="logo">
+          <i class="fas fa-code"></i>
+          VCodeClass
+        </a>
+        <nav>
+          <ul>
+            <li>
+              <a href="home.html"><i class="fas fa-home"></i> Home</a>
+            </li>
+            <li>
+              <a href="dashboard.html"
+                ><i class="fas fa-tachometer-alt"></i> Dashboard</a
+              >
+            </li>
+            <li>
+              <a href="editor.html"><i class="fas fa-code"></i> Editor</a>
+            </li>
+            <li>
+              <a href="Leaderboard.html"
+                ><i class="fas fa-trophy"></i> Leaderboard</a
+              >
+            </li>
+            <li>
+              <a href="#" onclick="logout()"
+                ><i class="fas fa-sign-out-alt"></i> Logout</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <section class="review-section">
+      <h1>Review Submission: <span id="assignmentTitle">Loading...</span></h1>
+      <div class="review-details">
+        <p>Student: <strong id="studentEmail">Loading...</strong></p>
+        <p>Submitted On: <strong id="submittedAt">Loading...</strong></p>
+        <p>Language: <strong id="submissionLanguage">Loading...</strong></p>
+        <p>Current Status: <strong id="submissionStatus">Loading...</strong></p>
+      </div>
+
+      <h3>Submitted Code:</h3>
+      <pre class="code-display-area" id="submittedCode">Loading code...</pre>
+
+      <h3>Last Run Output:</h3>
+      <pre class="output-display-area" id="submissionOutput">
+Loading output...</pre
+      >
+
+      <div class="feedback-section">
+        <h2>Provide Feedback</h2>
+        <label for="grade">Grade (0-100):</label>
+        <input
+          type="number"
+          id="grade"
+          min="0"
+          max="100"
+          placeholder="Enter grade"
+        />
+
+        <label for="feedbackText">Feedback:</label>
+        <textarea
+          id="feedbackText"
+          placeholder="Enter your feedback here..."
+        ></textarea>
+
+        <button id="saveFeedbackButton" class="btn">
+          <i class="fas fa-save"></i> Save Feedback
+        </button>
+      </div>
+    </section>
+
+    <!-- Custom Toast Message Element -->
+    <div id="reviewToast" class="toast"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // Function to create animated background particles (copied from dashboard/home)
+      function createParticles() {
+        const particlesContainer = document.getElementById("particles");
+        if (particlesContainer) {
+          particlesContainer.innerHTML = ""; // Clear existing particles
+        }
+        const particleCount = window.innerWidth < 768 ? 30 : 50;
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+          particle.style.left = Math.random() * 100 + "%";
+          particle.style.top = Math.random() * 100 + "%";
+          particle.style.animationDelay = Math.random() * 6 + "s";
+          particle.style.animationDuration = Math.random() * 3 + 3 + "s";
+          particlesContainer.appendChild(particle);
+        }
+      }
+
+      // Initialize particles when the window loads
+      window.onload = createParticles;
+
+      // Firebase configuration (already present in your file)
+      const firebaseConfig = {
+        apiKey: "AIzaSyAuOQ2V83e8o3Q_F9chjwtrN1kqw4qtUcg",
+        authDomain: "virtual-coding-classroom.firebaseapp.com",
+        projectId: "virtual-coding-classroom",
+        storageBucket: "virtual-coding-classroom.firebasestorage.app",
+        messagingSenderId: "201134199336",
+        appId: "1:201134199336:web:d9a43073d86dcbf97c1b1d",
+        measurementId: "G-3GMPFN3T6C",
+      };
+
+      // Initialize Firebase app and services
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      // Add resize handler for particles: re-create particles on window resize
+      window.addEventListener("resize", () => {
+        createParticles();
+      });
+
+      // Helper function for toast messages (updated to match dashboard styling)
+      function showToast(message, type = "info") {
+        const toastElement = document.getElementById("reviewToast");
+        if (toastElement) {
+          // Add icon based on message type
+          const iconClass =
+            type === "success"
+              ? "fas fa-check-circle"
+              : type === "error"
+              ? "fas fa-exclamation-circle"
+              : "fas fa-info-circle";
+          toastElement.innerHTML = `<i class="${iconClass}"></i> ${message}`;
+          toastElement.className = `toast show ${type}`;
+          setTimeout(() => {
+            toastElement.classList.remove("show");
+          }, 4000); // Increased duration for better readability
+        } else {
+          console.warn("Toast element not found. Message:", message);
+        }
+      }
+
+      // Global logout function (copied from dashboard/assignment)
+      window.logout = function () {
+        auth
+          .signOut()
+          .then(() => {
+            localStorage.removeItem("vcc_user");
+            localStorage.removeItem("vcc_role");
+            showToast("Logged out successfully!", "success");
+            setTimeout(() => (window.location.href = "login.html"), 1500);
+          })
+          .catch((error) => {
+            console.error("Error signing out:", error);
+            showToast("Error logging out. Please try again.", "error");
+          });
+      };
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Check if user is logged in and is a teacher
+        auth.onAuthStateChanged(async (user) => {
+          if (!user) {
+            showToast("Access denied! Please login.", "error");
+            setTimeout(() => (window.location.href = "login.html"), 1500);
+            return;
+          }
+          try {
+            const userDoc = await db.collection("users").doc(user.uid).get();
+            if (!userDoc.exists || userDoc.data().role !== "teacher") {
+              showToast(
+                "Access denied! Only teachers can review submissions.",
+                "error"
+              );
+              setTimeout(() => (window.location.href = "dashboard.html"), 1500);
+              return;
+            }
+          } catch (error) {
+            console.error("Error checking user role:", error);
+            showToast(
+              "An error occurred checking your role. Please try again.",
+              "error"
+            );
+            setTimeout(() => (window.location.href = "dashboard.html"), 1500);
+            return;
+          }
+
+          // --- Logic for displaying submission details ---
+          const assignmentTitleElement =
+            document.getElementById("assignmentTitle");
+          const studentEmailElement = document.getElementById("studentEmail");
+          const submittedAtElement = document.getElementById("submittedAt");
+          const submissionLanguageElement =
+            document.getElementById("submissionLanguage");
+          const submissionStatusElement =
+            document.getElementById("submissionStatus");
+          const submittedCodeElement = document.getElementById("submittedCode");
+          const submissionOutputElement =
+            document.getElementById("submissionOutput");
+          const gradeInput = document.getElementById("grade");
+          const feedbackTextInput = document.getElementById("feedbackText");
+          const saveFeedbackButton =
+            document.getElementById("saveFeedbackButton");
+
+          const urlParams = new URLSearchParams(window.location.search);
+          const submissionId = urlParams.get("id");
+
+          if (!submissionId) {
+            showToast("No submission ID provided.", "error");
+            assignmentTitleElement.textContent =
+              "Error: No Submission Selected";
+            return;
+          }
+
+          let currentSubmissionData = null; // To store fetched submission data
+
+          try {
+            const submissionDoc = await db
+              .collection("submissions")
+              .doc(submissionId)
+              .get();
+
+            if (submissionDoc.exists) {
+              currentSubmissionData = {
+                id: submissionDoc.id,
+                ...submissionDoc.data(),
+              };
+
+              // Fetch the associated assignment title
+              const assignmentDoc = await db
+                .collection("assignments")
+                .doc(currentSubmissionData.assignmentId)
+                .get();
+              const assignmentTitle = assignmentDoc.exists
+                ? assignmentDoc.data().title
+                : "Unknown Assignment";
+
+              assignmentTitleElement.textContent = assignmentTitle;
+              studentEmailElement.textContent =
+                currentSubmissionData.studentEmail;
+              submittedAtElement.textContent = currentSubmissionData.submittedAt
+                ? new Date(
+                    currentSubmissionData.submittedAt.toDate()
+                  ).toLocaleString()
+                : "N/A";
+              submissionLanguageElement.textContent =
+                currentSubmissionData.language.toUpperCase();
+              submissionStatusElement.textContent =
+                currentSubmissionData.status;
+              submittedCodeElement.textContent = currentSubmissionData.code;
+              submissionOutputElement.textContent =
+                currentSubmissionData.output || "No output recorded.";
+
+              // Pre-fill grade and feedback if already present
+              if (currentSubmissionData.grade !== undefined) {
+                gradeInput.value = currentSubmissionData.grade;
+              }
+              if (currentSubmissionData.feedback !== undefined) {
+                feedbackTextInput.value = currentSubmissionData.feedback;
+              }
+
+              showToast("Submission loaded successfully!", "success");
+            } else {
+              showToast("Submission not found.", "error");
+              assignmentTitleElement.textContent = "Submission Not Found";
+            }
+          } catch (error) {
+            console.error("Error loading submission:", error);
+            showToast(
+              "Failed to load submission details. Please try again.",
+              "error"
+            );
+            assignmentTitleElement.textContent = "Error Loading Submission";
+          }
+
+          // --- Logic for saving feedback ---
+          saveFeedbackButton.addEventListener("click", async () => {
+            if (!currentSubmissionData) {
+              showToast("No submission loaded to save feedback.", "error");
+              return;
+            }
+
+            const grade = gradeInput.value ? parseInt(gradeInput.value) : null;
+            const feedback = feedbackTextInput.value.trim();
+
+            if (grade !== null && (isNaN(grade) || grade < 0 || grade > 100)) {
+              showToast(
+                "Please enter a valid grade between 0 and 100.",
+                "error"
+              );
+              return;
+            }
+
+            showToast("Saving feedback...", "info");
+
+            try {
+              await db
+                .collection("submissions")
+                .doc(currentSubmissionData.id)
+                .update({
+                  grade: grade,
+                  feedback: feedback,
+                  status: "Graded", // Mark as 'Graded' once feedback is saved
+                  reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+
+              showToast("Feedback saved successfully!", "success");
+              submissionStatusElement.textContent = "Graded"; // Update status on page
+              // Optionally, redirect back to dashboard or submissions list
+              // setTimeout(() => window.location.href = "dashboard.html", 1500);
+            } catch (error) {
+              console.error("Error saving feedback:", error);
+              showToast("Failed to save feedback. Please try again.", "error");
+            }
+          });
+        }); // End of auth.onAuthStateChanged
+      }); // End of DOMContentLoaded
+
+      // Add smooth scroll behavior for anchor links (less critical for this page, but good for consistency)
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

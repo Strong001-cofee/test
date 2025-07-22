@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Editor - VCodeClass</title>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts for Inter and JetBrains Mono -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* CSS Variables for consistent theming (copied from other pages) */
+      :root {
+        --primary-bg: #0a0a0f;
+        --secondary-bg: #1a1a2e;
+        --glass-bg: rgba(26, 26, 46, 0.3);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --neon-primary: #00d4ff;
+        --neon-secondary: #ff006e;
+        --neon-accent: #8b5cf6;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a0a0;
+        --text-muted: #666666;
+        --success: #00ff88;
+        --warning: #ffaa00;
+        --error: #ff4757;
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        --shadow-neon: 0 0 20px rgba(0, 212, 255, 0.3);
+        --blur: 16px;
+        --header-height: 80px; /* Approximate height of the header */
+      }
+
+      /* Universal box-sizing for consistent layout */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Body styling for background, font, and layout */
+      body {
+        font-family: "Inter", sans-serif; /* Consistent font */
+        background: var(--primary-bg);
+        color: var(--text-primary);
+        line-height: 1.6;
+        /* Removed overflow-x: hidden; to allow content to dictate scroll */
+        min-height: 100vh; /* Ensure body takes full viewport height */
+        background-image: radial-gradient(
+            circle at 20% 80%,
+            rgba(120, 119, 198, 0.3),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(255, 119, 198, 0.3),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 40%,
+            rgba(120, 219, 255, 0.2),
+            transparent 50%
+          );
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Animated background particles (copied from other pages) */
+      .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: var(--neon-primary);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+        opacity: 0.6;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+          opacity: 0.6;
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+          opacity: 1;
+        }
+      }
+
+      /* Header Styles (copied from other pages) */
+      header {
+        backdrop-filter: blur(var(--blur));
+        -webkit-backdrop-filter: blur(var(--blur));
+        background: var(--glass-bg);
+        border-bottom: 1px solid var(--glass-border);
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow-glass);
+        height: var(--header-height); /* Fixed header height */
+        display: flex; /* Ensure content is centered vertically */
+        align-items: center;
+      }
+
+      .header-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+        width: 100%; /* Take full width of header */
+      }
+
+      .logo {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: var(--gradient-accent);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .logo:hover {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      nav a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        background: transparent;
+      }
+
+      nav a:hover {
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+
+      nav a::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: var(--gradient-accent);
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+      }
+
+      nav a:hover::after {
+        width: 80%;
+      }
+
+      /* Editor Section Layout */
+      .editor-container {
+        display: flex;
+        flex-direction: column; /* Stack editor and chat vertically on small screens */
+        width: 100%; /* Take full width */
+        height: calc(
+          100vh - var(--header-height) - 40px
+        ); /* Fill remaining height, accounting for padding */
+        margin: 0 auto; /* Center horizontally */
+        padding: 20px; /* Consistent padding around the container */
+        gap: 2rem; /* Space between editor and chat sections */
+        position: relative;
+        z-index: 10;
+        flex-grow: 1; /* Allow container to grow */
+      }
+
+      @media (min-width: 1024px) {
+        .editor-container {
+          flex-direction: row; /* Side-by-side on larger screens */
+          align-items: flex-start; /* Align sections to the top */
+        }
+      }
+
+      .editor-section {
+        flex: 3; /* Editor takes more space */
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--blur));
+        -webkit-backdrop-filter: blur(var(--blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: var(--shadow-glass);
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        animation: fadeInUp 1s ease-out;
+        height: 100%; /* Make editor section fill its flex container */
+        overflow-y: auto; /* Allow scrolling within editor section if content overflows */
+      }
+
+      .editor-section h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        line-height: 1.2;
+      }
+
+      .lang-select {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 20px;
+        justify-content: center;
+      }
+
+      .lang-select label {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .lang-select select {
+        padding: 10px 15px;
+        background-color: var(--secondary-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-family: "Inter", sans-serif;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 18px;
+        cursor: pointer;
+        box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .lang-select select:focus {
+        outline: none;
+        border-color: var(--neon-primary);
+        box-shadow: inset 0 0 8px rgba(0, 212, 255, 0.3),
+          0 0 15px rgba(0, 212, 255, 0.2);
+      }
+
+      .code-box {
+        width: 100%;
+        min-height: 300px; /* Further increased min-height for code editor */
+        background-color: var(--secondary-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.95rem;
+        padding: 15px;
+        margin-bottom: 15px;
+        resize: vertical; /* Allow user to resize vertically */
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        display: none; /* Hidden by default */
+        transition: all 0.3s ease;
+        flex-grow: 1; /* Allow code boxes to grow and fill space */
+      }
+
+      .code-box.active {
+        display: block; /* Shown when active */
+      }
+
+      #preview {
+        width: 100%;
+        height: 400px; /* Further increased height for preview iframe */
+        border: 1px solid var(--neon-secondary);
+        border-radius: 12px;
+        background-color: #fff; /* Default white for preview */
+        margin-top: 15px;
+        box-shadow: var(--shadow-glass);
+        flex-grow: 1; /* Allow preview to grow */
+      }
+
+      /* Button Styles (copied from other pages) */
+      .btn {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        margin-top: 10px;
+        width: fit-content; /* Adjust width to content */
+        align-self: flex-end; /* Align buttons to the right */
+      }
+
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .btn:hover::before {
+        left: 100%;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Specific button styling for editor */
+      .editor-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end; /* Align buttons to the right */
+        margin-top: 15px;
+      }
+
+      /* Chat Section Styles */
+      .chat-section {
+        flex: 1; /* Chat takes less space */
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--blur));
+        -webkit-backdrop-filter: blur(var(--blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: var(--shadow-glass);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        animation: fadeInUp 1s ease-out 0.2s; /* Staggered animation */
+        height: 100%; /* Make chat section fill its flex container */
+      }
+
+      .chat-section h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        background: var(--gradient-accent);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        border: 1px solid var(--neon-primary); /* Neon border for chat area */
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: var(--secondary-bg); /* Darker background */
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Space between messages */
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .chat-message {
+        padding: 10px 15px;
+        border-radius: 20px; /* More rounded bubbles */
+        max-width: 85%; /* Slightly wider messages */
+        word-wrap: break-word;
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+
+      .chat-message.self {
+        align-self: flex-end;
+        background: var(--gradient-primary); /* Gradient for self messages */
+        color: white;
+      }
+
+      .chat-message.other {
+        align-self: flex-start;
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.1
+        ); /* Lighter glass for others */
+        color: var(--text-primary);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .chat-message strong {
+        font-size: 0.9em;
+        color: var(--neon-accent); /* Neon accent for name */
+        margin-right: 5px;
+        font-weight: 600;
+      }
+      .chat-message .timestamp {
+        font-size: 0.75em;
+        color: var(--text-muted); /* Muted color for timestamp */
+        margin-left: 10px;
+        display: block; /* New line for timestamp */
+        text-align: right;
+        margin-top: 5px;
+      }
+
+      .chat-message.other .timestamp {
+        text-align: left;
+      }
+
+      .chat-input-area {
+        display: flex;
+        gap: 10px;
+      }
+
+      .chat-input-area input {
+        flex-grow: 1;
+        padding: 12px 15px;
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        background-color: var(--secondary-bg);
+        color: var(--text-primary);
+        font-size: 1rem;
+        box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
+        transition: border-color 0.3s ease;
+      }
+
+      .chat-input-area input:focus {
+        outline: none;
+        border-color: var(--neon-primary);
+      }
+
+      .chat-input-area button {
+        padding: 12px 20px;
+        background: var(
+          --gradient-accent
+        ); /* Accent gradient for send button */
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .chat-input-area button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3),
+          0 0 15px rgba(0, 212, 255, 0.3);
+      }
+
+      /* Toast message styles (copied from dashboard) */
+      .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        color: var(--text-primary);
+        box-shadow: var(--shadow-glass);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 400px;
+        display: flex; /* For icon alignment */
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .toast.success {
+        border-color: var(--success);
+        box-shadow: var(--shadow-glass), 0 0 20px rgba(0, 255, 136, 0.3);
+      }
+
+      .toast.error {
+        border-color: var(--error);
+        box-shadow: var(--shadow-glass), 0 0 20px rgba(255, 71, 87, 0.3);
+      }
+
+      .toast.info {
+        border-color: var(--neon-primary);
+        box-shadow: var(--shadow-glass), 0 0 20px rgba(0, 212, 255, 0.3);
+      }
+
+      /* Loading Animation (copied from dashboard) */
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--neon-primary);
+        animation: spin 1s ease-in-out infinite;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Animations (copied from other pages) */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Mobile Responsiveness (copied from other pages and adapted) */
+      @media (max-width: 1023px) {
+        /* Adjusted breakpoint for stacking */
+        .editor-container {
+          padding: 1rem; /* Smaller padding on mobile */
+          margin: 20px auto;
+          height: auto; /* Allow height to expand */
+          min-height: calc(
+            100vh - var(--header-height) - 40px
+          ); /* Ensure minimum height */
+          flex-direction: column; /* Stack editor and chat */
+        }
+
+        .editor-section,
+        .chat-section {
+          padding: 20px;
+          height: auto; /* Allow content to dictate height */
+          min-height: 400px; /* Minimum height for sections on mobile */
+        }
+
+        .editor-section h1 {
+          font-size: 2rem;
+        }
+
+        .lang-select {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+
+        .code-box {
+          min-height: 200px; /* Adjusted min-height for mobile code editor */
+          font-size: 0.85rem;
+        }
+
+        #preview {
+          height: 250px; /* Adjusted height for mobile preview iframe */
+        }
+
+        .editor-buttons {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .btn {
+          width: 100%;
+          font-size: 0.9rem;
+          padding: 0.6rem 1.5rem;
+        }
+
+        .chat-section h2 {
+          font-size: 1.8rem;
+        }
+
+        .chat-messages {
+          min-height: 200px; /* Ensure chat is visible */
+        }
+
+        .chat-message {
+          font-size: 0.85rem;
+        }
+
+        .chat-input-area input {
+          font-size: 0.9rem;
+          padding: 10px 12px;
+        }
+
+        .chat-input-area button {
+          font-size: 0.9rem;
+          padding: 10px 15px;
+        }
+
+        .toast {
+          bottom: 1rem;
+          right: 1rem;
+          left: 1rem;
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .editor-section h1 {
+          font-size: 1.8rem;
+        }
+        .chat-section h2 {
+          font-size: 1.5rem;
+        }
+      }
+
+      /* Scrollbar Styling (copied from other pages) */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--primary-bg);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--gradient-accent);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--neon-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Animated Background Particles -->
+    <div class="particles" id="particles"></div>
+
+    <header>
+      <div class="header-container">
+        <a href="home.html" class="logo">
+          <i class="fas fa-code"></i>
+          VCodeClass
+        </a>
+        <nav>
+          <ul>
+            <li>
+              <a href="home.html"><i class="fas fa-home"></i> Home</a>
+            </li>
+            <li>
+              <a href="dashboard.html"
+                ><i class="fas fa-tachometer-alt"></i> Dashboard</a
+              >
+            </li>
+            <li>
+              <a href="editor.html"><i class="fas fa-code"></i> Editor</a>
+            </li>
+            <li>
+              <a href="Leaderboard.html"
+                ><i class="fas fa-trophy"></i> Leaderboard</a
+              >
+            </li>
+            <li>
+              <a href="#" onclick="logout()"
+                ><i class="fas fa-sign-out-alt"></i> Logout</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <div class="editor-container">
+      <section class="editor-section">
+        <h1>Now Coding: <span id="editorTitle">Free Code Editor</span></h1>
+
+        <div class="lang-select">
+          <label for="language">Choose Language:</label>
+          <select id="language">
+            <option value="html">HTML/CSS/JS</option>
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
+            <option value="python">Python</option>
+          </select>
+        </div>
+
+        <!-- Editor Boxes -->
+        <textarea
+          id="html-editor"
+          class="code-box active"
+          placeholder="Write HTML here..."
+        ></textarea>
+        <textarea
+          id="css-editor"
+          class="code-box active"
+          placeholder="Write CSS here..."
+        ></textarea>
+        <textarea
+          id="js-editor"
+          class="code-box active"
+          placeholder="Write JavaScript here..."
+        ></textarea>
+        <textarea
+          id="generic-editor"
+          class="code-box"
+          placeholder="Write your code here..."
+        ></textarea>
+        <!-- Input box for generic languages -->
+        <textarea
+          id="user-input"
+          class="code-box"
+          placeholder="Enter input for your code here (e.g., for C/C++/Java/Python)..."
+        ></textarea>
+
+        <div class="editor-buttons">
+          <button class="btn" id="runCodeButton">
+            <i class="fas fa-play"></i> Run
+          </button>
+          <button class="btn" id="submitAssignmentButton">
+            <i class="fas fa-paper-plane"></i> Submit Assignment
+          </button>
+        </div>
+
+        <!-- Preview for HTML/CSS/JS -->
+        <iframe id="preview" title="Output Preview"></iframe>
+      </section>
+
+      <section class="chat-section">
+        <h2><i class="fas fa-comments"></i> Assignment Chat</h2>
+        <div id="chatMessages" class="chat-messages">
+          <!-- Chat messages will be loaded here -->
+          <p class="chat-message other">
+            <strong>VCodeClass Bot</strong> <span>Welcome to the chat!</span>
+            <span class="timestamp">Just now</span>
+          </p>
+        </div>
+        <div class="chat-input-area">
+          <input
+            type="text"
+            id="chatInput"
+            placeholder="Type your message..."
+          />
+          <button id="sendMessageButton">
+            <i class="fas fa-paper-plane"></i> Send
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Custom Toast Message Element -->
+    <div id="editorToast" class="toast"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- Link to your external JavaScript file -->
+    <script src="editorScript.js" defer></script>
+  </body>
+</html>
